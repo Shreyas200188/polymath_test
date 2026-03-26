@@ -7,7 +7,12 @@ from semantic_retriever import semantic_retrieve
 from query_understanding import normalize_query
 from enhancer import enhance_products
 from dotenv import load_dotenv
+import os
+
 load_dotenv()  # reads .env into environment
+
+api_key = os.getenv("OPENAI_API_KEY")
+print("Current OpenAI API key:", api_key)
 
 def run_query(query):
     products = load_products()
