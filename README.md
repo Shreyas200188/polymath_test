@@ -13,6 +13,12 @@ A Shopify merchant has been running their store for 5 years. They have great pro
 
 A merchant with unstructured product pages, no JSON-LD schema, and keyword-stuffed descriptions is essentially invisible to these agents — regardless of their SEO score.
 
+## How a Merchant Would Use This
+
+- Export or stream their catalog (via Shopify API) into this backend.
+- Generate structured JSON, summaries, and embeddings for all products.
+- Expose this as an API/feed that AI agents or on-site AI search can query for ranked, explainable product results.
+
 ---
 
 ## What This Project Does
