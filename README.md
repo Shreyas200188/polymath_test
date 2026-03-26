@@ -1,99 +1,82 @@
-# AI Commerce Discovery – Improving Visibility for Shopify Merchants
+# AI Commerce Discovery – Making Shopify Merchants Visible to AI Shopping Agents
 
-## Overview
+## The Problem This Solves
 
-This project explores why high-quality Shopify merchants fail to appear in AI-powered shopping results, and proposes a practical backend solution to improve their discoverability.
+A Shopify merchant has been running their store for 5 years. They have great products, strong reviews, and solid SEO. But when a customer asks ChatGPT, Perplexity, or Claude *"what's the best running shoe under $100?"* — this merchant never shows up.
 
-Instead of building a UI, this project focuses on how modern AI agents (e.g., ChatGPT, Claude, Perplexity) discover, interpret, and retrieve product information from websites — and how we can optimize for that pipeline.
+**Why?** Because AI shopping agents don't rank results the same way Google does. They retrieve products by:
 
----
+- Parsing structured, machine-readable data (not raw HTML)
+- Matching semantic meaning, not just keywords
+- Summarizing and ranking based on contextual relevance
+- Relying on rich, entity-level understanding of products
 
-## Problem
-
-A Shopify merchant with:
-
-* Strong SEO
-* High-quality products
-* Good reviews
-
-…still does not appear in AI-driven shopping experiences.
-
-Why?
-
-Because AI agents do **not rely on traditional SEO alone**. They depend on:
-
-* Structured data
-* Crawlable and clean content
-* Semantic understanding
-* External signals and embeddings
+A merchant with unstructured product pages, no JSON-LD schema, and keyword-stuffed descriptions is essentially invisible to these agents — regardless of their SEO score.
 
 ---
 
-## Goal
+## What This Project Does
 
-Build a system that:
+This project simulates the full AI product discovery pipeline — from raw product data to ranked AI retrieval — and demonstrates concretely how a merchant can go from invisible to discoverable.
 
-1. Simulates how AI agents currently discover products (**baseline**)
-2. Improves product representation using structured + semantic techniques (**enhanced pipeline**)
-3. Demonstrates improved retrieval quality
+It does this by building two parallel pipelines side-by-side:
 
----
+**Baseline** → how AI agents currently process a typical Shopify store (poorly)
 
-## Approach
+**Enhanced** → how the same products look after structured extraction, LLM summarization, and embedding-based semantic retrieval
 
-### 1. Baseline Pipeline (Current AI Discovery)
-
-* Input: Raw product page (HTML)
-* Steps:
-
-  * Scrape visible content
-  * Extract text
-  * Use naive keyword matching
-* Output:
-
-  * Poorly structured product representation
+The improvement in ranking quality between the two pipelines is the core output.
 
 ---
 
-### 2. Enhanced Pipeline (Proposed Solution)
-
-We improve discoverability by transforming the product data into formats that AI systems prefer.
-
-#### Key Enhancements:
-
-* Structured extraction (title, price, reviews, specs)
-* Schema enrichment (JSON-LD style data)
-* AI-generated product summaries
-* Embedding generation for semantic retrieval
-* Query → product matching using vector similarity
-
----
-
-## System Architecture
+## How It Works
 
 ```
-Raw Product Page
-        ↓
-   Scraper
-        ↓
-   Parser
-        ↓
- -------------------------
-| Baseline Representation |
- -------------------------
-        ↓
-
- -------------------------
-| Enhanced Representation |
-| - Structured JSON       |
-| - AI Summary            |
-| - Embeddings            |
- -------------------------
-        ↓
-   Retrieval Engine
-        ↓
-   Ranked Results
+Raw Product Data (JSON)
+         │
+         ├──────────────────────────┐
+         ▼                          ▼
+  BASELINE PIPELINE          ENHANCED PIPELINE
+  ─────────────────          ─────────────────
+  Keyword matching           Structured Extraction
+  (title + price only)       (category, use_case, features)
+                                     │
+                             Query Understanding
+                             (synonym expansion,
+                              intent normalization)
+                                     │
+                             LLM Summarization
+                             (human-readable product summary
+                              via OpenAI)
+                                     │
+                             Embedding Generation
+                             (semantic vector per product)
+                                     │
+                             Cosine Similarity Retrieval
+                                     │
+         ▼                          ▼
+  Weak, keyword-matched      Ranked, semantically relevant
+  results                    results — AI-agent ready
 ```
+
+---
+
+## What Was Built
+
+### Structured Extraction (`structured_extractor.py`)
+Parses raw product titles and descriptions using spaCy to extract structured fields: `category`, `use_case`, and `features`. Fully domain-agnostic — works for any product type, not just a single category. This mirrors what JSON-LD schema markup does for web crawlers, but applied at inference time.
+
+### Query Understanding (`query_understanding.py`)
+Normalizes and expands user queries before retrieval. Maps synonyms and intent signals (e.g. "marathon" → "running", "office wear" → "formal") so that products rank correctly even when the user's phrasing doesn't match the product's exact wording. This is the same kind of query rewriting used by AI search engines internally.
+
+### LLM-based Enhancer (`enhancer.py`)
+Calls OpenAI to generate concise, structured summaries for each product. The output is a clean natural-language description of what the product is and who it's for — the kind of context that makes an AI agent confident enough to cite a product in a response.
+
+### Semantic Retrieval (`semantic_retriever.py`)
+Converts product descriptions to embedding vectors and ranks them against incoming queries using cosine similarity. Replaced an earlier TF-IDF implementation. This is the retrieval mechanism closest to how RAG-based AI agents actually surface products.
+
+### Baseline vs Enhanced Comparison (`main.py`)
+Runs both pipelines against the same queries and prints ranked results side-by-side, showing the concrete improvement in product visibility.
 
 ---
 
@@ -103,17 +86,17 @@ Raw Product Page
 polymath_test/
 │
 ├── src/
-│   ├── main.py
-│   ├── scraper.py
-│   ├── parser.py
-│   ├── enhancer.py
-│   ├── embeddings.py
-│   ├── retriever.py
+│   ├── main.py                  # Entry point; runs and compares both pipelines
+│   ├── scraper.py               # Product data loading
+│   ├── parser.py                # Raw data parsing
+│   ├── structured_extractor.py  # spaCy-based structured field extraction
+│   ├── query_understanding.py   # Query normalization and expansion
+│   ├── enhancer.py              # LLM-based product summarization
+│   ├── semantic_retriever.py    # Embedding + cosine similarity retrieval
+│   └── embeddings.py            # Embedding utilities
 │
 ├── data/
-│   └── sample_products.json
-│
-├── tests/
+│   └── sample_products.json     # Sample Shopify-style product dataset
 │
 ├── requirements.txt
 └── README.md
@@ -121,121 +104,87 @@ polymath_test/
 
 ---
 
-## How to Run
+## Setup & Run
 
 ```bash
 git clone https://github.com/Shreyas200188/polymath_test.git
 cd polymath_test
 
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate         # Windows: venv\Scripts\activate
 
-pip install -r requirements.txt
+pip install -r requirements.txt  # installs spaCy model automatically
+```
 
-export OPENAI_API_KEY="your_api_key_here"  # Mac/Linux
-# setx OPENAI_API_KEY "your_api_key_here"  # Windows
+Set your OpenAI API key:
+```bash
+# Mac/Linux
+export OPENAI_API_KEY="your_api_key_here"
 
+# Windows (PowerShell)
+$env:OPENAI_API_KEY="your_api_key_here"
+```
+
+Run the pipeline:
+```bash
 python src/main.py
 ```
 
 ---
 
-## Example Flow
+## Example Output
 
-1. Load sample Shopify product pages
-2. Run baseline extraction
-3. Run enhanced pipeline
-4. Compare retrieval results for sample queries
+```
+Query: "lightweight running shoes for marathon training"
+
+── BASELINE RESULTS ──────────────────────────────
+1. Nike Air Max 270        $130
+2. Adidas Stan Smith       $85
+3. Puma Suede Classic      $75
+
+── ENHANCED RESULTS ──────────────────────────────
+1. Nike Pegasus 40         $120   [use_case: running, features: lightweight, cushioned]
+   Summary: A long-distance running shoe built for high mileage with responsive
+   foam and breathable upper. Ideal for marathon and half-marathon training.
+
+2. Brooks Ghost 15         $140   [use_case: running, features: neutral support, durable]
+   Summary: A neutral daily trainer suited for marathon prep, offering soft
+   landings and consistent mileage performance.
+
+3. New Balance Fresh Foam  $110   [use_case: running, features: plush, road-ready]
+   Summary: Cushioned road shoe for endurance runners seeking comfort over
+   long distances.
+```
+
+The baseline surfaces shoes alphabetically by loose keyword match. The enhanced pipeline returns shoes that are semantically relevant to marathon training — the kind of result an AI agent would actually cite.
 
 ---
 
-## Key Insight
+## Dependencies
 
-AI agents prefer:
-
-* Clean structured data over raw HTML
-* Semantic meaning over keywords
-* Context-rich summaries over fragmented text
-
-This project demonstrates how small backend changes can significantly improve visibility in AI-driven commerce.
+| Library | Purpose |
+|---|---|
+| `openai` | LLM summarization and embeddings |
+| `spacy` + `en_core_web_sm` | Structured feature extraction |
+| `nltk` | Text preprocessing |
+| `numpy` | Cosine similarity computation |
+| `python-dotenv` | API key management |
+| `requests` | HTTP utilities |
 
 ---
 
 ## Future Improvements
 
-* Real Shopify API integration
-* Multi-product ranking benchmarks
-* External signal integration (reviews, Reddit, etc.)
-* Fine-tuned ranking models
+- Real Shopify API integration to pull live product data
+- JSON-LD schema generator: output merchant-ready structured markup to embed in Shopify store HTML
+- Multi-merchant benchmarking across product categories
+- External signal integration (reviews, Reddit mentions, social proof)
+- `llms.txt` generation for direct AI agent crawling compatibility
 
 ---
 
 ## Why This Matters
 
-As AI becomes the primary interface for discovery, traditional SEO is no longer enough.
+Traditional SEO optimizes for how search engine crawlers rank pages. But AI agents don't rank pages — they retrieve and synthesize *information*. A product that isn't structured, summarized, and semantically indexed is as invisible to an AI agent as a page with no title tag is to Google.
 
-Merchants must optimize for:
-
-> “AI readability” instead of just “search engine ranking”
-
-This project is a step in that direction.
-
-## 🟢 Progress Update (Phase-wise Summary)
-
-### Initial Baseline
-- Loaded products from `products.json`.
-- Implemented **simple keyword-based retrieval**.
-- Displayed basic query results using product titles and prices.
-
-### Phase 1 — Structured Extraction
-- Created `structured_extractor.py`.
-- Extracted structured data from product titles and descriptions:
-  - `category`
-  - `use_case`
-  - `features` (adjectives/keywords)
-- Initially used simple heuristics (hard-coded for shoes), now replaced with **fully generic noun/adjective extraction** using spaCy.
-
-### Phase 2 — Query Understanding
-- Created `query_understanding.py`.
-- Implemented **query normalization and expansion**:
-  - Mapped synonyms and intents (e.g., "marathon" → "running", "office" → "formal").
-  - Expanded query terms to improve structured retrieval.
-
-### Phase 3 — Enhancement
-- Created `enhancer.py`.
-- Added **automatic summaries** for structured products.
-- Normalized product data for more readable outputs.
-
-### Phase 4 — Semantic Retrieval
-- Created `semantic_retriever.py` using **TF-IDF**:
-  - Converts product descriptions to vector representations.
-  - Computes similarity with normalized queries for better ranking.
-
-### Current Improvements Over Baseline
-- Generic, **domain-agnostic structured extraction** (works for any product type, not just shoes).
-- Query understanding layer for better intent mapping.
-- Structured and semantic retrieval **rank products more accurately**.
-- Added product summaries and feature extraction for **explainable results**.
-- Semantic similarity ensures relevant products appear even if keywords don’t match exactly.
-
-**Next Planned Phases**
-- Upgrade semantic retrieval to **vector embeddings** (OpenAI or Sentence-Transformers).
-- Integrate **cosine similarity search** for improved ranking.
-- Add a **mini LLM-based feature/summary generator** for richer structured data.
-
-## 🟢 Progress & Upgrades - v2
-
-**Phase 5 — LLM-based Structured Extraction & Embeddings**
-- Replaced TF-IDF with **embedding-based cosine similarity** for semantic ranking.
-- LLM extracts **category, use_case, features, summary** for any product.
-- Eliminated false positives: semantic similarity ensures only relevant products rank high.
-- Fully domain-agnostic and self-learning from product descriptions.
-
-**Phase 6 — Enhancer & Explainability**
-- Added concise, human-readable summaries for each product.
-- Supports merchant AI discoverability: products are surfaced intelligently to AI agents or users.
-
-**Next Steps / Optional Enhancements**
-- Cache embeddings locally for faster runtime.
-- Expand products dataset for better coverage.
-- Add LLM-based recommendation explanations for merchants.
+This project is a working prototype of the pipeline a merchant would need to make their products AI-discoverable — not someday, but right now, using the same mechanisms today's AI shopping agents rely on.
