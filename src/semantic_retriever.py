@@ -1,31 +1,28 @@
-from embeddings import compute_idf, compute_tfidf, cosine_similarity
+# semantic_retriever.py
+from openai import OpenAI
+import os
+import numpy as np
+from dotenv import load_dotenv
 
+load_dotenv() 
 
-def build_corpus(structured_products):
-    docs = []
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def embed_text(text):
+    """Get embedding vector for a text"""
+    resp = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text
+    )
+    return np.array(resp.data[0].embedding)
+
+def semantic_retrieve(query, structured_products, top_k=5):
+    """Return top_k products based on embedding similarity"""
+    query_emb = embed_text(query)
+    results = []
     for p in structured_products:
-        text = f"{p['name']} {p['category']} {p['use_case']} {' '.join(p['features'])} {p['raw_description']}"
-        docs.append(text)
-    return docs
-
-
-def semantic_retrieve(query, structured_products):
-    corpus = build_corpus(structured_products)
-
-    idf = compute_idf(corpus)
-
-    product_vectors = [
-        compute_tfidf(doc, idf) for doc in corpus
-    ]
-
-    query_vec = compute_tfidf(query, idf)
-
-    scored = []
-    for i, product in enumerate(structured_products):
-        sim = cosine_similarity(query_vec, product_vectors[i])
-        scored.append((sim, product))
-
-    scored.sort(key=lambda x: x[0], reverse=True)
-
-    # keep top 3 only
-    return [p for score, p in scored[:3] if score > 0]
+        p_emb = embed_text(p["summary"])
+        sim = np.dot(query_emb, p_emb) / (np.linalg.norm(query_emb) * np.linalg.norm(p_emb))
+        results.append((sim, p))
+    results.sort(reverse=True, key=lambda x: x[0])
+    return [p for _, p in results[:top_k]]

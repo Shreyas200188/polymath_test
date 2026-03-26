@@ -1,40 +1,50 @@
-import spacy
-from collections import Counter
+# structured_extractor.py
+from openai import OpenAI
+import os
+import json
+from dotenv import load_dotenv
 
-nlp = spacy.load("en_core_web_sm")
+load_dotenv() 
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def extract_structure(product):
     """
-    Fully generic structured extractor for any product.
-    - Detect category from most frequent noun in title + description
-    - Use_case from secondary nouns if available
-    - Features from adjectives
+    Extract structured information and generate summary using LLM.
+    Works for any product type.
     """
-    text = f"{product['title']}. {product['description']}".lower()
-    doc = nlp(text)
-
-    # Extract nouns & proper nouns as candidates for category/use_case
-    nouns = [token.lemma_ for token in doc if token.pos_ in ("NOUN", "PROPN")]
-    adjectives = [token.lemma_ for token in doc if token.pos_ == "ADJ"]
-
-    if nouns:
-        # category = most common noun
-        category = Counter(nouns).most_common(1)[0][0]
-        # use_case = second most common noun if exists, else same as category
-        use_case = Counter(nouns).most_common(2)[1][0] if len(Counter(nouns).most_common(2)) > 1 else category
-    else:
-        category = "general"
-        use_case = "general"
-
-    return {
-        "id": product["id"],
-        "name": product["title"],
-        "price": product["price"],
-        "category": category,
-        "use_case": use_case,
-        "features": adjectives,
-        "raw_description": product["description"]
-    }
+    prompt = f"""
+    Extract structured info from this product in JSON format:
+    Title: {product['title']}
+    Description: {product['description']}
+    
+    JSON keys:
+    - category (general product type, e.g., running shoes, formal shoes, electronics)
+    - use_case (primary usage, e.g., running, formal, hiking)
+    - features (list of key features/adjectives)
+    - summary (one concise sentence describing the product)
+    """
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0
+        )
+        structured = resp.choices[0].message.content.strip()
+        return json.loads(structured)
+    except Exception as e:
+        print(f"LLM fallback for {product['title']}: {e}")
+        # fallback minimal structure
+        return {
+            "id": product["id"],
+            "name": product["title"],
+            "price": product["price"],
+            "category": "general",
+            "use_case": "general",
+            "features": [],
+            "raw_description": product["description"],
+            "summary": product["description"]
+        }
 
 def structure_products(products):
     return [extract_structure(p) for p in products]

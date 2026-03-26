@@ -132,6 +132,9 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 
+export OPENAI_API_KEY="your_api_key_here"  # Mac/Linux
+# setx OPENAI_API_KEY "your_api_key_here"  # Windows
+
 python src/main.py
 ```
 
@@ -219,3 +222,20 @@ This project is a step in that direction.
 - Upgrade semantic retrieval to **vector embeddings** (OpenAI or Sentence-Transformers).
 - Integrate **cosine similarity search** for improved ranking.
 - Add a **mini LLM-based feature/summary generator** for richer structured data.
+
+## 🟢 Progress & Upgrades - v2
+
+**Phase 5 — LLM-based Structured Extraction & Embeddings**
+- Replaced TF-IDF with **embedding-based cosine similarity** for semantic ranking.
+- LLM extracts **category, use_case, features, summary** for any product.
+- Eliminated false positives: semantic similarity ensures only relevant products rank high.
+- Fully domain-agnostic and self-learning from product descriptions.
+
+**Phase 6 — Enhancer & Explainability**
+- Added concise, human-readable summaries for each product.
+- Supports merchant AI discoverability: products are surfaced intelligently to AI agents or users.
+
+**Next Steps / Optional Enhancements**
+- Cache embeddings locally for faster runtime.
+- Expand products dataset for better coverage.
+- Add LLM-based recommendation explanations for merchants.
