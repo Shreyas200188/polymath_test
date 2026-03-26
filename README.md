@@ -194,3 +194,54 @@ The baseline surfaces shoes alphabetically by loose keyword match. The enhanced 
 Traditional SEO optimizes for how search engine crawlers rank pages. But AI agents don't rank pages — they retrieve and synthesize *information*. A product that isn't structured, summarized, and semantically indexed is as invisible to an AI agent as a page with no title tag is to Google.
 
 This project is a working prototype of the pipeline a merchant would need to make their products AI-discoverable — not someday, but right now, using the same mechanisms today's AI shopping agents rely on.
+
+## Thought Process — Start to End
+
+### Why is a good merchant invisible?
+
+My first instinct was to look at how AI agents actually retrieve products. Tools like ChatGPT Shopping and Perplexity aren't doing Google-style ranking — they're doing retrieval-augmented generation. They pull structured, semantically rich chunks of text and reason over them. A Shopify store with raw HTML and keyword-stuffed descriptions gives those agents almost nothing to work with.
+
+### Simulating the retrieval pipeline
+
+Rather than building a UI or a Shopify plugin, I wanted to go one layer deeper — actually model how an AI agent ingests and ranks product data, and show what happens when you improve the input. That meant building two pipelines in parallel: one that works like a naive crawler today, and one that produces the kind of data an AI agent actually prefers.
+
+### Building it in layers
+
+I started simple — just keyword matching on titles and prices. That became the baseline. Then I added spaCy to extract structured fields from descriptions, because the first thing an AI agent needs is to understand what a product *is* and *who it's for*, not just what it's called. Then I added query understanding, because users don't search in catalog language — "marathon shoes" and "road running footwear" mean the same thing, but a keyword matcher treats them as completely different. Then I brought in OpenAI to generate product summaries, because an AI agent won't cite a product it can't contextualize. And finally I replaced TF-IDF with embedding-based cosine similarity, which is the closest approximation to how RAG retrieval actually works.
+
+### Every step maps back to the original problem
+
+| Gap | Fix |
+|---|---|
+| No structured data | Structured extraction via spaCy |
+| Query phrasing mismatch | Query normalization and expansion |
+| No context for AI to cite | LLM-generated product summaries |
+| Keyword retrieval misses semantic matches | Embedding-based cosine similarity |
+
+---
+
+## Given More Time
+
+### 1. JSON-LD Schema Generator
+The most direct real-world output. Instead of just improving retrieval internally, generate merchant-ready JSON-LD markup they can drop straight into their Shopify theme. That's what actually makes them visible to AI crawlers at the source — before any retrieval even happens.
+
+### 2. `llms.txt` File Generator
+There's an emerging standard, similar to `robots.txt`, that tells AI agents directly what a site is about and what its best content is. Auto-generating this from the enriched product data means agents crawling the site get a clean, structured index immediately.
+
+### 3. Real Shopify API Integration
+Right now the pipeline runs on sample JSON. Connecting it to the live Shopify API means a merchant can run this on their actual catalog, with automatic re-enrichment whenever a product is added or updated.
+
+### 4. Benchmarking Across Multiple Merchants
+The demo shows one merchant improving. The real proof would be: across 10 merchants in the same category, the ones running this pipeline appear in AI results X% more often than those who don't. That's the number that makes the business case undeniable.
+
+### 5. An Actual AI Agent Test Harness
+Instead of simulating retrieval internally, pipe enriched product data directly into a real ChatGPT or Perplexity query and measure whether the merchant actually gets cited. Closing that loop turns this from a simulation into a measurable product.
+
+### 6. External Signal Integration
+Incorporate reviews, social proof, and Reddit mentions as additional ranking signals. AI agents weight trust and community validation heavily — a product with 200 five-star reviews and organic Reddit discussion should rank above an identical product with none, and right now the pipeline doesn't capture that.
+
+### 7. Richer Query Understanding
+The current synonym and intent map is hand-crafted and narrow. Replacing it with a larger database — or training a small intent classifier — would make query expansion work across any product category without manual upkeep.
+
+### 8. Extended LLM Usage
+Beyond summaries, use the LLM to generate product comparisons ("vs. competitor X"), AI-friendly metadata tags, and rich search snippets. These are the formats AI agents most readily pull into a response, so producing them directly maximizes the chance of a merchant getting cited.
