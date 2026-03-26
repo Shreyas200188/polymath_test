@@ -2,7 +2,7 @@
   {
     "id": 1,
     "title": "UltraBoost Running Shoes",
-    "description": "Comfortable running shoes with responsive cushioning, great for long distance runs.",
+    "description": "Comfortable running shoes with responsive cushioning, great for long distance runs and marathons.",
     "price": 120
   },
   {
@@ -16,5 +16,35 @@
     "title": "Trail Running Sneakers",
     "description": "Durable sneakers designed for trail running with excellent grip.",
     "price": 110
+  },
+  {
+    "id": 4,
+    "title": "Marathon Pro Running Shoes",
+    "description": "Lightweight running shoes optimized for marathon performance and endurance.",
+    "price": 150
+  },
+  {
+    "id": 5,
+    "title": "Casual Everyday Sneakers",
+    "description": "Stylish sneakers for everyday casual wear and comfort.",
+    "price": 70
+  },
+  {
+    "id": 6,
+    "title": "Hiking Boots",
+    "description": "Rugged boots designed for hiking and outdoor adventures.",
+    "price": 130
+  },
+  {
+    "id": 7,
+    "title": "Formal Dress Shoes",
+    "description": "Elegant formal shoes for business and formal occasions.",
+    "price": 95
+  },
+  {
+    "id": 8,
+    "title": "Gym Training Shoes",
+    "description": "Versatile shoes suitable for gym workouts and cross training.",
+    "price": 85
   }
 ]

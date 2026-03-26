@@ -38,4 +38,11 @@ def structured_retrieve(query, structured_products):
 
     scored.sort(key=lambda x: x[0], reverse=True)
 
-    return [p for score, p in scored if score > 0]
+    # only keep meaningful results
+    filtered = [(score, p) for score, p in scored if score >= 2]
+
+    # fallback if nothing passes threshold
+    if not filtered:
+        filtered = scored[:2]  # return top 2 anyway
+
+    return [p for score, p in filtered]
