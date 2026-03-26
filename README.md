@@ -176,3 +176,46 @@ Merchants must optimize for:
 > “AI readability” instead of just “search engine ranking”
 
 This project is a step in that direction.
+
+## 🟢 Progress Update (Phase-wise Summary)
+
+### Initial Baseline
+- Loaded products from `products.json`.
+- Implemented **simple keyword-based retrieval**.
+- Displayed basic query results using product titles and prices.
+
+### Phase 1 — Structured Extraction
+- Created `structured_extractor.py`.
+- Extracted structured data from product titles and descriptions:
+  - `category`
+  - `use_case`
+  - `features` (adjectives/keywords)
+- Initially used simple heuristics (hard-coded for shoes), now replaced with **fully generic noun/adjective extraction** using spaCy.
+
+### Phase 2 — Query Understanding
+- Created `query_understanding.py`.
+- Implemented **query normalization and expansion**:
+  - Mapped synonyms and intents (e.g., "marathon" → "running", "office" → "formal").
+  - Expanded query terms to improve structured retrieval.
+
+### Phase 3 — Enhancement
+- Created `enhancer.py`.
+- Added **automatic summaries** for structured products.
+- Normalized product data for more readable outputs.
+
+### Phase 4 — Semantic Retrieval
+- Created `semantic_retriever.py` using **TF-IDF**:
+  - Converts product descriptions to vector representations.
+  - Computes similarity with normalized queries for better ranking.
+
+### Current Improvements Over Baseline
+- Generic, **domain-agnostic structured extraction** (works for any product type, not just shoes).
+- Query understanding layer for better intent mapping.
+- Structured and semantic retrieval **rank products more accurately**.
+- Added product summaries and feature extraction for **explainable results**.
+- Semantic similarity ensures relevant products appear even if keywords don’t match exactly.
+
+**Next Planned Phases**
+- Upgrade semantic retrieval to **vector embeddings** (OpenAI or Sentence-Transformers).
+- Integrate **cosine similarity search** for improved ranking.
+- Add a **mini LLM-based feature/summary generator** for richer structured data.
