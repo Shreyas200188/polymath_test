@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "title": "UltraBoost Running Shoes",
+    "description": "Comfortable running shoes with responsive cushioning, great for long distance runs.",
+    "price": 120
+  },
+  {
+    "id": 2,
+    "title": "Leather Office Shoes",
+    "description": "Formal leather shoes suitable for office and business meetings.",
+    "price": 90
+  },
+  {
+    "id": 3,
+    "title": "Trail Running Sneakers",
+    "description": "Durable sneakers designed for trail running with excellent grip.",
+    "price": 110
+  }
+]
